@@ -1,8 +1,8 @@
 "use client";
 
-import { CodePreview } from "@/components/CodePreview";
-import { ModelSelect } from "@/components/ModelSelect";
-import { RefreshCw, MessageSquare } from "lucide-react";
+import { CodePreview } from "@/components/code-preview";
+import { ModelPanelHeader } from "@/components/model-panel-header";
+import { MessageSquare } from "lucide-react";
 
 interface GenerationResult {
   model: string;
@@ -17,6 +17,10 @@ interface ModelPanelProps {
   result: GenerationResult | null;
   loading: boolean;
   setPrompt: (prompt: string) => void;
+  onRemove?: () => void;
+  onAdd?: () => void;
+  canRemove: boolean;
+  isLast: boolean;
 }
 
 export function ModelPanel({
@@ -25,12 +29,21 @@ export function ModelPanel({
   result,
   loading,
   setPrompt,
+  onRemove,
+  onAdd,
+  canRemove,
+  isLast,
 }: ModelPanelProps) {
   return (
     <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b border-border bg-muted/20">
-        <ModelSelect value={model} onValueChange={setModel} />
-      </div>
+      <ModelPanelHeader
+        model={model}
+        setModel={setModel}
+        onRemove={onRemove}
+        onAdd={onAdd}
+        canRemove={canRemove}
+        isLast={isLast}
+      />
 
       <div className="flex-1 p-4 overflow-hidden">
         {loading ? (

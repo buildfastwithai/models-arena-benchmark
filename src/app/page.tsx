@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { ModelPanel } from "@/components/ModelPanel";
-import { PromptBox } from "@/components/PromptBox";
+import { ModelPanel } from "@/components/model-panel";
+import { PromptBox } from "@/components/prompt-box";
 import { type PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import { toast } from "sonner";
+import { Sidebar } from "@/components/sidebar";
 
 interface GenerationResult {
   model: string;
@@ -14,12 +14,19 @@ interface GenerationResult {
   error?: string;
 }
 
+interface ModelSection {
+  id: string;
+  model: string;
+  result: GenerationResult | null;
+  loading: boolean;
+}
+
 export default function BenchmarkArena() {
   const [apiKey, setApiKey] = useState("");
 
   // Load API key from localStorage on mount
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('openrouter-api-key');
+    const savedApiKey = localStorage.getItem("openrouter-api-key");
     if (savedApiKey) {
       setApiKey(savedApiKey);
     }
@@ -29,35 +36,65 @@ export default function BenchmarkArena() {
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
     if (key) {
-      localStorage.setItem('openrouter-api-key', key);
+      localStorage.setItem("openrouter-api-key", key);
     } else {
-      localStorage.removeItem('openrouter-api-key');
+      localStorage.removeItem("openrouter-api-key");
     }
   };
   const [prompt, setPrompt] = useState("");
-  const [model1, setModel1] = useState("openai/gpt-5");
-  const [model2, setModel2] = useState("x-ai/grok-code-fast-1");
-  const [result1, setResult1] = useState<GenerationResult | null>(null);
-  const [result2, setResult2] = useState<GenerationResult | null>(null);
-  const [loading1, setLoading1] = useState(false);
-  const [loading2, setLoading2] = useState(false);
+  const [modelSections, setModelSections] = useState<ModelSection[]>([
+    { id: "1", model: "openai/gpt-5", result: null, loading: false },
+    { id: "2", model: "x-ai/grok-code-fast-1", result: null, loading: false },
+  ]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [promptBoxVisible, setPromptBoxVisible] = useState(true);
+
+  // Helper functions for managing model sections
+  const addModelSection = () => {
+    const newId = Date.now().toString();
+    setModelSections((prev) => [
+      ...prev,
+      {
+        id: newId,
+        model: "openai/gpt-4o-mini",
+        result: null,
+        loading: false,
+      },
+    ]);
+  };
+
+  const removeModelSection = (id: string) => {
+    if (modelSections.length > 1) {
+      setModelSections((prev) => prev.filter((section) => section.id !== id));
+    }
+  };
+
+  const updateModelSection = (id: string, updates: Partial<ModelSection>) => {
+    setModelSections((prev) =>
+      prev.map((section) =>
+        section.id === id ? { ...section, ...updates } : section
+      )
+    );
+  };
 
   const handleSubmit = async (message: PromptInputMessage) => {
     if (!apiKey) {
       toast.error("Please enter your OpenRouter API key");
       return;
     }
-    if (!message.text || !model1 || !model2) {
+    if (!message.text || modelSections.some((section) => !section.model)) {
       toast.error("Please fill in all fields");
       return;
     }
 
-    setLoading1(true);
-    setLoading2(true);
-    setResult1(null);
-    setResult2(null);
+    // Set all sections to loading and clear results
+    setModelSections((prev) =>
+      prev.map((section) => ({
+        ...section,
+        loading: true,
+        result: null,
+      }))
+    );
 
     try {
       const response = await fetch("/api/generate", {
@@ -67,7 +104,7 @@ export default function BenchmarkArena() {
         },
         body: JSON.stringify({
           prompt: message.text,
-          models: [model1, model2],
+          models: modelSections.map((section) => section.model),
           apiKey,
         }),
       });
@@ -80,48 +117,59 @@ export default function BenchmarkArena() {
       // Handle streaming response
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      
+
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-          
+          const lines = chunk.split("\n");
+
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
+            if (line.startsWith("data: ")) {
               try {
                 const data = JSON.parse(line.slice(6));
-                
-                if (data.modelIndex === 0) {
-                  setResult1(data);
-                  setLoading1(false);
-                } else if (data.modelIndex === 1) {
-                  setResult2(data);
-                  setLoading2(false);
+
+                // Update the corresponding model section
+                const sectionId = modelSections[data.modelIndex]?.id;
+                if (sectionId) {
+                  updateModelSection(sectionId, {
+                    result: data,
+                    loading: false,
+                  });
                 }
               } catch (parseError) {
-                console.error('Error parsing streaming data:', parseError);
+                console.error("Error parsing streaming data:", parseError);
               }
             }
           }
         }
       }
-      
+
       setPrompt(message.text || "");
     } catch (error) {
       console.error("Error:", error);
       toast.error(error instanceof Error ? error.message : "An error occurred");
-      setLoading1(false);
-      setLoading2(false);
+      // Reset all loading states on error
+      setModelSections((prev) =>
+        prev.map((section) => ({
+          ...section,
+          loading: false,
+        }))
+      );
     }
   };
 
   const handleReset = () => {
     setPrompt("");
-    setResult1(null);
-    setResult2(null);
+    setModelSections((prev) =>
+      prev.map((section) => ({
+        ...section,
+        result: null,
+        loading: false,
+      }))
+    );
   };
 
   return (
@@ -134,22 +182,21 @@ export default function BenchmarkArena() {
       />
 
       <div className="flex-1 flex flex-col relative">
-        <div className="flex-1 flex divide-x divide-border">
-          <ModelPanel
-            model={model1}
-            setModel={setModel1}
-            result={result1}
-            loading={loading1}
-            setPrompt={setPrompt}
-          />
-
-          <ModelPanel
-            model={model2}
-            setModel={setModel2}
-            result={result2}
-            loading={loading2}
-            setPrompt={setPrompt}
-          />
+        <div className="flex-1 flex divide-x divide-border overflow-hidden">
+          {modelSections.map((section, index) => (
+            <ModelPanel
+              key={section.id}
+              model={section.model}
+              setModel={(model) => updateModelSection(section.id, { model })}
+              result={section.result}
+              loading={section.loading}
+              setPrompt={setPrompt}
+              onRemove={() => removeModelSection(section.id)}
+              onAdd={addModelSection}
+              canRemove={modelSections.length > 1}
+              isLast={index === modelSections.length - 1}
+            />
+          ))}
         </div>
 
         <PromptBox
@@ -157,9 +204,9 @@ export default function BenchmarkArena() {
           setPrompt={setPrompt}
           promptBoxVisible={promptBoxVisible}
           setPromptBoxVisible={setPromptBoxVisible}
-          loading={loading1 || loading2}
-          model1={model1}
-          model2={model2}
+          loading={modelSections.some((section) => section.loading)}
+          model1={modelSections[0]?.model || ""}
+          model2={modelSections[1]?.model || ""}
           onSubmit={handleSubmit}
           onReset={handleReset}
         />

@@ -42,10 +42,17 @@ export async function POST(req: NextRequest) {
               - Make it visually appealing and functional
               - The code should work when displayed in an iframe
               - Don't include any external dependencies or CDN links
-              - Make it responsive and modern looking`,
+              - Make it responsive and modern looking
+              - Response in json format`,
               schema: z.object({
-                html: z.string().describe("Complete HTML code with inline CSS and JavaScript"),
-                title: z.string().describe("Short title describing what was created")
+                html: z
+                  .string()
+                  .describe(
+                    "Complete HTML code with inline CSS and JavaScript"
+                  ),
+                title: z
+                  .string()
+                  .describe("Short title describing what was created"),
               }),
             });
 
@@ -57,7 +64,9 @@ export async function POST(req: NextRequest) {
             };
 
             // Send the result immediately when this model completes
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(resultData)}\n\n`));
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(resultData)}\n\n`)
+            );
           } catch (error) {
             console.error(`Error with model ${modelId}:`, error);
             const errorData = {
@@ -67,7 +76,9 @@ export async function POST(req: NextRequest) {
               error: error instanceof Error ? error.message : "Unknown error",
             };
 
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`));
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`)
+            );
           }
         });
 
@@ -79,9 +90,9 @@ export async function POST(req: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
