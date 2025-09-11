@@ -5,7 +5,7 @@ import { ModelPanel } from "@/components/model-panel";
 import { PromptBox } from "@/components/prompt-box";
 import { type PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import { toast } from "sonner";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/Sidebar";
 
 interface GenerationResult {
   model: string;
@@ -57,10 +57,10 @@ export default function BenchmarkArena() {
         setSidebarCollapsed(true);
       }
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
   const [promptBoxVisible, setPromptBoxVisible] = useState(true);
 
