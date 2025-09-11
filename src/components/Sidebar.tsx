@@ -23,6 +23,7 @@ interface SidebarProps {
   setSidebarCollapsed: (collapsed: boolean) => void;
   apiKey: string;
   setApiKey: (key: string) => void;
+  isMobile?: boolean;
 }
 
 export function Sidebar({
@@ -30,18 +31,28 @@ export function Sidebar({
   setSidebarCollapsed,
   apiKey,
   setApiKey,
+  isMobile = false,
 }: SidebarProps) {
   return (
     <div
-      className={`${
-        sidebarCollapsed ? "w-12" : "w-80"
-      } border-r border-border bg-card/30 flex flex-col transition-all duration-300 ease-in-out relative`}
+      className={cn(
+        "border-r border-border bg-card/30 flex flex-col transition-all duration-300 ease-in-out relative",
+        isMobile
+          ? sidebarCollapsed
+            ? "w-full h-16"
+            : "w-full h-auto max-h-[50vh]"
+          : sidebarCollapsed
+          ? "w-12"
+          : "w-80"
+      )}
     >
       <Button
         variant="ghost"
         size="sm"
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border border-border bg-background shadow-sm hover:bg-muted"
+        className={`absolute z-10 h-6 w-6 rounded-full border border-border bg-background shadow-sm hover:bg-muted ${
+          isMobile ? '-right-3 top-2' : '-right-3 top-6'
+        }`}
       >
         {sidebarCollapsed ? (
           <ChevronRight className="h-3 w-3" />
@@ -68,10 +79,12 @@ export function Sidebar({
       </div>
 
       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Settings className="h-4 w-4 flex-shrink-0" />
-          {!sidebarCollapsed && <span>CONFIGURATION</span>}
-        </div>
+        {!isMobile && (
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Settings className="h-4 w-4 flex-shrink-0" />
+            {!sidebarCollapsed && <span>CONFIGURATION</span>}
+          </div>
+        )}
 
         {!sidebarCollapsed && (
           <div className="space-y-4">

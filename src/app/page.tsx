@@ -47,6 +47,21 @@ export default function BenchmarkArena() {
     { id: "2", model: "x-ai/grok-code-fast-1", result: null, loading: false },
   ]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setSidebarCollapsed(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const [promptBoxVisible, setPromptBoxVisible] = useState(true);
 
   // Helper functions for managing model sections
@@ -173,16 +188,17 @@ export default function BenchmarkArena() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
       <Sidebar
         sidebarCollapsed={sidebarCollapsed}
         setSidebarCollapsed={setSidebarCollapsed}
         apiKey={apiKey}
         setApiKey={handleApiKeyChange}
+        isMobile={isMobile}
       />
 
       <div className="flex-1 flex flex-col relative">
-        <div className="flex-1 flex divide-x divide-border overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row md:divide-x divide-border overflow-hidden space-y-4 md:space-y-0">
           {modelSections.map((section, index) => (
             <ModelPanel
               key={section.id}
@@ -209,6 +225,7 @@ export default function BenchmarkArena() {
           model2={modelSections[1]?.model || ""}
           onSubmit={handleSubmit}
           onReset={handleReset}
+          isMobile={isMobile}
         />
       </div>
     </div>
