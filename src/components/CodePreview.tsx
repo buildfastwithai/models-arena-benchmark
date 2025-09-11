@@ -18,10 +18,10 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
   useEffect(() => {
     if (html) {
       // Create a blob URL for the HTML content to ensure proper isolation
-      const blob = new Blob([html], { type: 'text/html' });
+      const blob = new Blob([html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       setIframeSrc(url);
-      
+
       // Cleanup function to revoke the URL when component unmounts or HTML changes
       return () => {
         URL.revokeObjectURL(url);
@@ -43,7 +43,7 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
 
   const handleRefresh = () => {
     // Force iframe to reload by changing its key
-    setKey(prev => prev + 1);
+    setKey((prev) => prev + 1);
   };
 
   if (isLoading) {
@@ -72,7 +72,7 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-3 border-b border-border bg-muted/20">
+      <div className="flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-2">
           <div className="text-sm font-medium text-foreground">
             {title || "Generated Code"}
@@ -105,7 +105,7 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
           </Button>
         </div>
       </div>
-      
+
       <div className="flex-1 relative">
         {iframeSrc && (
           <iframe

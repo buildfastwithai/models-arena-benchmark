@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ModelPanel } from "@/components/ModelPanel";
 import { PromptBox } from "@/components/PromptBox";
@@ -16,12 +16,31 @@ interface GenerationResult {
 
 export default function BenchmarkArena() {
   const [apiKey, setApiKey] = useState("");
+
+  // Load API key from localStorage on mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openrouter-api-key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  // Save API key to localStorage when it changes
+  const handleApiKeyChange = (key: string) => {
+    setApiKey(key);
+    if (key) {
+      localStorage.setItem('openrouter-api-key', key);
+    } else {
+      localStorage.removeItem('openrouter-api-key');
+    }
+  };
   const [prompt, setPrompt] = useState("");
   const [model1, setModel1] = useState("openai/gpt-5");
   const [model2, setModel2] = useState("x-ai/grok-code-fast-1");
   const [result1, setResult1] = useState<GenerationResult | null>(null);
   const [result2, setResult2] = useState<GenerationResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [promptBoxVisible, setPromptBoxVisible] = useState(true);
 
@@ -35,7 +54,8 @@ export default function BenchmarkArena() {
       return;
     }
 
-    setLoading(true);
+    setLoading1(true);
+    setLoading2(true);
     setResult1(null);
     setResult2(null);
 
@@ -52,22 +72,49 @@ export default function BenchmarkArena() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate code");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate code");
       }
 
-      const [result1, result2] = data.results;
-      console.log(result1, result2);
-      setResult1(result1);
-      setResult2(result2);
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                
+                if (data.modelIndex === 0) {
+                  setResult1(data);
+                  setLoading1(false);
+                } else if (data.modelIndex === 1) {
+                  setResult2(data);
+                  setLoading2(false);
+                }
+              } catch (parseError) {
+                console.error('Error parsing streaming data:', parseError);
+              }
+            }
+          }
+        }
+      }
+      
       setPrompt(message.text || "");
     } catch (error) {
       console.error("Error:", error);
       toast.error(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setLoading(false);
+      setLoading1(false);
+      setLoading2(false);
     }
   };
 
@@ -83,7 +130,7 @@ export default function BenchmarkArena() {
         sidebarCollapsed={sidebarCollapsed}
         setSidebarCollapsed={setSidebarCollapsed}
         apiKey={apiKey}
-        setApiKey={setApiKey}
+        setApiKey={handleApiKeyChange}
       />
 
       <div className="flex-1 flex flex-col relative">
@@ -92,7 +139,7 @@ export default function BenchmarkArena() {
             model={model1}
             setModel={setModel1}
             result={result1}
-            loading={loading}
+            loading={loading1}
             setPrompt={setPrompt}
           />
 
@@ -100,7 +147,7 @@ export default function BenchmarkArena() {
             model={model2}
             setModel={setModel2}
             result={result2}
-            loading={loading}
+            loading={loading2}
             setPrompt={setPrompt}
           />
         </div>
@@ -110,7 +157,7 @@ export default function BenchmarkArena() {
           setPrompt={setPrompt}
           promptBoxVisible={promptBoxVisible}
           setPromptBoxVisible={setPromptBoxVisible}
-          loading={loading}
+          loading={loading1 || loading2}
           model1={model1}
           model2={model2}
           onSubmit={handleSubmit}

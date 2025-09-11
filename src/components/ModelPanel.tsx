@@ -32,7 +32,7 @@ export function ModelPanel({
         <ModelSelect value={model} onValueChange={setModel} />
       </div>
 
-      <div className="flex-1 p-6 overflow-hidden">
+      <div className="flex-1 p-4 overflow-hidden">
         {loading ? (
           <CodePreview html="" isLoading={true} />
         ) : result ? (
