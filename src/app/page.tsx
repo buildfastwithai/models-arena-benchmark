@@ -196,9 +196,6 @@ export default function BenchmarkArena() {
                     <SelectValue placeholder="Select model" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="qwen/qwen3-coder">
-                      Qwen 3 Coder
-                    </SelectItem>
                     <SelectItem value="moonshotai/kimi-k2-0905">
                       Kimi K2 0905
                     </SelectItem>

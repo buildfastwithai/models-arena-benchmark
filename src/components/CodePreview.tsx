@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Copy, RefreshCw } from "lucide-react";
 
@@ -12,17 +12,20 @@ interface CodePreviewProps {
 
 export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeSrc, setIframeSrc] = useState<string>("");
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
-    if (iframeRef.current && html) {
-      const iframe = iframeRef.current;
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (html) {
+      // Create a blob URL for the HTML content to ensure proper isolation
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      setIframeSrc(url);
       
-      if (doc) {
-        doc.open();
-        doc.write(html);
-        doc.close();
-      }
+      // Cleanup function to revoke the URL when component unmounts or HTML changes
+      return () => {
+        URL.revokeObjectURL(url);
+      };
     }
   }, [html]);
 
@@ -39,16 +42,8 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
   };
 
   const handleRefresh = () => {
-    if (iframeRef.current) {
-      const iframe = iframeRef.current;
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      
-      if (doc) {
-        doc.open();
-        doc.write(html);
-        doc.close();
-      }
-    }
+    // Force iframe to reload by changing its key
+    setKey(prev => prev + 1);
   };
 
   if (isLoading) {
@@ -112,12 +107,16 @@ export function CodePreview({ html, title, isLoading }: CodePreviewProps) {
       </div>
       
       <div className="flex-1 relative">
-        <iframe
-          ref={iframeRef}
-          className="w-full h-full border-0 bg-white rounded-b-xl"
-          sandbox="allow-scripts allow-same-origin"
-          title="Generated Code Preview"
-        />
+        {iframeSrc && (
+          <iframe
+            key={key}
+            ref={iframeRef}
+            src={iframeSrc}
+            className="w-full h-full border-0 bg-white rounded-b-xl"
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            title="Generated Code Preview"
+          />
+        )}
       </div>
     </div>
   );
