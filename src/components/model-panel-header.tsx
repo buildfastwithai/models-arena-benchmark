@@ -22,7 +22,7 @@ export function ModelPanelHeader({
   isLast,
 }: ModelPanelHeaderProps) {
   return (
-    <div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between gap-2">
+    <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-accent/5 flex items-center justify-between gap-2">
       <div className="flex-1">
         <ModelSelect value={model} onValueChange={setModel} />
       </div>
@@ -33,7 +33,7 @@ export function ModelPanelHeader({
             variant="ghost"
             size="sm"
             onClick={onRemove}
-            className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+            className="h-8 w-8 p-0 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 hover:text-red-600 transition-all duration-200"
             title="Remove model panel"
           >
             <X className="h-4 w-4" />
@@ -45,7 +45,7 @@ export function ModelPanelHeader({
             variant="ghost"
             size="sm"
             onClick={onAdd}
-            className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-600"
+            className="h-8 w-8 p-0 hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-200 hover:text-green-600 transition-all duration-200"
             title="Add model panel"
           >
             <Plus className="h-4 w-4" />

@@ -36,7 +36,7 @@ export function Sidebar({
   return (
     <div
       className={cn(
-        "border-r border-border bg-card/30 flex flex-col transition-all duration-300 ease-in-out relative",
+        "border-r border-border bg-gradient-to-b from-card/40 to-card/20 flex flex-col transition-all duration-300 ease-in-out relative backdrop-blur-sm",
         isMobile
           ? sidebarCollapsed
             ? "w-full h-16"
@@ -51,7 +51,7 @@ export function Sidebar({
         size="sm"
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         className={`absolute z-10 h-6 w-6 rounded-full border border-border bg-background shadow-sm hover:bg-muted ${
-          isMobile ? '-right-3 top-2' : '-right-3 top-6'
+          isMobile ? "-right-3 top-2" : "-right-3 top-6"
         }`}
       >
         {sidebarCollapsed ? (
@@ -61,14 +61,17 @@ export function Sidebar({
         )}
       </Button>
 
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-gradient-to-r from-primary/10 to-secondary/10">
         <div
           className={cn(
             "flex items-center gap-2 py-[0.15rem]",
             sidebarCollapsed && "py-2.5"
           )}
         >
-          <Zap className="h-5 w-5 text-primary flex-shrink-0" />
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/30 rounded-full blur-sm"></div>
+            <Zap className="relative h-5 w-5 text-primary flex-shrink-0" />
+          </div>
           {!sidebarCollapsed && (
             <h1 className="font-semibold text-foreground text-sm leading-tight">
               BUILD FAST
@@ -124,7 +127,9 @@ export function Sidebar({
               </div>
               <div className="space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-start gap-2">
-                  <span className="font-medium text-primary">1.</span>
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    1
+                  </div>
                   <div>
                     <p className="font-medium text-foreground mb-1">
                       Get API Key
@@ -136,7 +141,9 @@ export function Sidebar({
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="font-medium text-primary">2.</span>
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-accent to-chart-3 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    2
+                  </div>
                   <div>
                     <p className="font-medium text-foreground mb-1">
                       Select Models
@@ -149,7 +156,9 @@ export function Sidebar({
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="font-medium text-primary">3.</span>
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-chart-4 to-chart-5 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    3
+                  </div>
                   <div>
                     <p className="font-medium text-foreground mb-1">
                       View Results
@@ -169,12 +178,12 @@ export function Sidebar({
 
       {!sidebarCollapsed && (
         <div className="p-4 border-t border-border space-y-3">
-          <div className="bg-muted rounded-lg p-4 text-foreground">
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-4 text-foreground border border-primary/20">
             <h3 className="font-semibold text-sm mb-2 text-center">
               Want to build apps like this?
             </h3>
             <Button
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs font-medium"
+              className="w-full bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 h-8 text-xs font-medium shadow-md transition-all duration-200"
               onClick={() =>
                 window.open(
                   "https://buildfastwithai.com/genai-course",
@@ -189,7 +198,7 @@ export function Sidebar({
           <Button
             variant="outline"
             size="sm"
-            className="w-full h-8 text-xs"
+            className="w-full h-8 text-xs border-gradient-to-r from-accent/30 to-chart-3/30 hover:bg-gradient-to-r hover:from-accent/10 hover:to-chart-3/10"
             onClick={() =>
               window.open(
                 "https://github.com/buildfastwithai/models-arena-benchmark",
