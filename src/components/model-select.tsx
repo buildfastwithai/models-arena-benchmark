@@ -18,6 +18,7 @@ interface ModelSelectProps {
 const models = [
   { value: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
   { value: "x-ai/grok-4-fast:free", label: "Grok 4 Fast" },
+  { value: "meituan/longcat-flash-chat", label: "Longcat Flash Chat" },
   { value: "openai/gpt-5", label: "GPT-5" },
   { value: "openai/gpt-oss-120b", label: "GPT-OSS 120B" },
   { value: "anthropic/claude-sonnet-4", label: "Claude Sonnet 4" },
