@@ -3,6 +3,8 @@ import { generateObject } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
 
+export const maxDuration = 100;
+
 export async function POST(req: NextRequest) {
   try {
     const { prompt, models, apiKey } = await req.json();
@@ -34,16 +36,21 @@ export async function POST(req: NextRequest) {
             const result = await generateObject({
               model: openrouter.chat(modelId),
               prompt: `Generate complete HTML, CSS, and JavaScript code for: ${prompt}
-              
-              Requirements:
-              - Create a complete, working HTML page
-              - Include all CSS styles inline in a <style> tag
-              - Include all JavaScript inline in a <script> tag
-              - Make it visually appealing and functional
-              - The code should work when displayed in an iframe
-              - Don't include any external dependencies or CDN links
-              - Make it responsive and modern looking
-              - Response in json format`,
+
+Requirements:
+- Create a complete, working HTML page
+- Include all CSS styles inline in a <style> tag
+- Include all JavaScript inline in a <script> tag
+- Make it visually appealing and functional
+- The code should work when displayed in an iframe
+- Don't include any external dependencies or CDN links
+- Make it responsive and modern looking
+
+Return a JSON object with exactly two fields:
+- "html": Complete HTML code with inline CSS and JavaScript
+- "title": Short title describing what was created
+
+Do not include any markdown formatting, code blocks, or extra text like (\`\`\`json\n). Return only valid JSON.`,
               schema: z.object({
                 html: z
                   .string()

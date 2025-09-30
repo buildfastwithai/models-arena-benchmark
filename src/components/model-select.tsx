@@ -1,6 +1,5 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,6 +15,8 @@ interface ModelSelectProps {
 }
 
 const models = [
+  { value: "anthropic/claude-sonnet-4.5", label: "Claude Sonnet 4.5" },
+  { value: "deepseek/deepseek-v3.2-exp", label: "DeepSeek V3.2 Exp" },
   { value: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
   { value: "x-ai/grok-4-fast:free", label: "Grok 4 Fast" },
   { value: "meituan/longcat-flash-chat", label: "Longcat Flash Chat" },

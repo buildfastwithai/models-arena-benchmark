@@ -43,8 +43,18 @@ export default function BenchmarkArena() {
   };
   const [prompt, setPrompt] = useState("");
   const [modelSections, setModelSections] = useState<ModelSection[]>([
-    { id: "1", model: "openai/gpt-5", result: null, loading: false },
-    { id: "2", model: "x-ai/grok-code-fast-1", result: null, loading: false },
+    {
+      id: "1",
+      model: "anthropic/claude-sonnet-4.5",
+      result: null,
+      loading: false,
+    },
+    {
+      id: "2",
+      model: "deepseek/deepseek-v3.2-exp",
+      result: null,
+      loading: false,
+    },
   ]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
